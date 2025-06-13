@@ -13,6 +13,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="shortcut icon" type="image/png" href="/avatar.png" />
+      </head>
       <body>{children}</body>
     </html>
   );
