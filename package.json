@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@slack/web-api": "^7.9.2",
+    "@vercel/functions": "^2.2.0",
     "next": "15.3.3",
+    "openai": "^5.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "typescript-json-decoder": "^1.0.11"

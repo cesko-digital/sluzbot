@@ -27,7 +27,7 @@ export const decodeEventCallback = <Event>(
     event: decodeEvent,
   });
 
-/** https://api.slack.com/events/app_mention */
+export type AppMention = decodeType<typeof decodeAppMentionEvent>;
 export const decodeAppMentionEvent = record({
   type: literal("app_mention"),
   user: string,
