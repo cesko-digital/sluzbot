@@ -38,9 +38,25 @@ async function respondToMention(mention: AppMention): Promise<void> {
   const openai = new OpenAI({ apiKey: process.env.OPEN_AI_API_KEY });
   const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
 
+  const spinnerReaction = "hourglass_flowing_sand";
+
+  // Start spinner
+  await slack.reactions.add({
+    name: spinnerReaction,
+    channel: mention.channel,
+    timestamp: mention.ts,
+  });
+
   const response = await openai.responses.create({
     model: "gpt-4.1",
     input: mention.text,
+  });
+
+  // Stop spinner
+  await slack.reactions.remove({
+    name: spinnerReaction,
+    channel: mention.channel,
+    timestamp: mention.ts,
   });
 
   if (response.error) {
