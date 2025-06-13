@@ -10,6 +10,7 @@
     "test": "glob -c 'tsx --test' 'src/**/*.test.ts'"
   },
   "dependencies": {
+    "@slack/web-api": "^7.9.2",
     "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
