@@ -36,13 +36,22 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 async function respondToMention(mention: AppMention): Promise<void> {
   const openai = new OpenAI({ apiKey: process.env.OPEN_AI_API_KEY });
+  const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
 
   const response = await openai.responses.create({
     model: "gpt-4.1",
     input: mention.text,
   });
 
-  const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
+  if (response.error) {
+    await slack.chat.postMessage({
+      channel: mention.channel,
+      thread_ts: mention.event_ts,
+      text: response.error.message,
+    });
+    return;
+  }
+
   await slack.chat.postMessage({
     channel: mention.channel,
     thread_ts: mention.event_ts,
