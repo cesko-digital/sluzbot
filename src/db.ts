@@ -41,7 +41,7 @@ export const createSession = (
 ): Promise<Session | null> =>
   table
     .create({
-      ID: session.sessionId,
+      "Session ID": session.sessionId,
       "Last Response ID": session.lastResponseId,
     })
     .then((record) => record.fields)
