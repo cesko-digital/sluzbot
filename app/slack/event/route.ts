@@ -96,16 +96,14 @@ async function respondToMention(mention: AppMention): Promise<void> {
   if (session) {
     console.log(`Updating last response ID for session to ${response.id}.`);
     await saveSession({ ...session, lastResponseId: response.id });
-  } else if (mention.thread_ts) {
+  } else {
     console.log(
       `Creating new session with initial response ID ${response.id}.`
     );
     await createSession({
-      sessionId: mention.thread_ts,
+      sessionId: mention.thread_ts ?? mention.ts,
       lastResponseId: response.id,
     });
-  } else {
-    console.warn("Mention is not a part of a thread, is this wrong?");
   }
 
   await stopSpinner();
