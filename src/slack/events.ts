@@ -27,6 +27,7 @@ export const decodeEventCallback = <Event>(
     event: decodeEvent,
   });
 
+/** Event received when somebody mentions an app */
 export type AppMention = decodeType<typeof decodeAppMentionEvent>;
 export const decodeAppMentionEvent = record({
   type: literal("app_mention"),

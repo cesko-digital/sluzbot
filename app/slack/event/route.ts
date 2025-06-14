@@ -18,12 +18,17 @@ export async function POST(request: NextRequest): Promise<Response> {
   try {
     const msg = decodeIncomingMessage(await request.json());
     if (msg.token !== process.env.SLACK_LEGACY_VERIFICATION_TOKEN) {
+      console.error("Slack verification token does not match, ignoring.");
       return new Response("Verification token does not match", { status: 403 });
     }
     switch (msg.type) {
       case "url_verification":
+        console.log("Received Slack URL verification request.");
         return new Response(msg.challenge, { status: 200 });
       case "event_callback":
+        console.log(
+          `Received Slack app mention event, time stamp ${msg.event.ts} (event time stamp ${msg.event.event_ts}).`
+        );
         // Return a response to Slack immediately, but also wait
         // for the chat response to finish before exiting
         waitUntil(respondToMention(msg.event));
