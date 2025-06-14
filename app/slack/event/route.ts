@@ -16,7 +16,9 @@ export async function POST(request: NextRequest): Promise<Response> {
     decodeEventCallback(decodeAppMentionEvent)
   );
   try {
-    const msg = decodeIncomingMessage(await request.json());
+    const json = await request.json();
+    console.log(JSON.stringify(json, null, 2));
+    const msg = decodeIncomingMessage(json);
     if (msg.token !== process.env.SLACK_LEGACY_VERIFICATION_TOKEN) {
       console.error("Slack verification token does not match, ignoring.");
       return new Response("Verification token does not match", { status: 403 });
