@@ -2,6 +2,7 @@ import {
   DecoderFunction,
   decodeType,
   literal,
+  optional,
   record,
   string,
 } from "typescript-json-decoder";
@@ -36,4 +37,5 @@ export const decodeAppMentionEvent = record({
   ts: string,
   channel: string,
   event_ts: string,
+  thread_ts: optional(string),
 });
