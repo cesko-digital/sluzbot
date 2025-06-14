@@ -9,6 +9,7 @@ import { WebClient } from "@slack/web-api";
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { union } from "typescript-json-decoder";
+import { createSession, getExistingSession, saveSession } from "@/src/db";
 
 export async function POST(request: NextRequest): Promise<Response> {
   const decodeIncomingMessage = union(
@@ -53,19 +54,36 @@ async function respondToMention(mention: AppMention): Promise<void> {
     timestamp: mention.ts,
   });
 
+  const stopSpinner = () =>
+    slack.reactions.remove({
+      name: spinnerReaction,
+      channel: mention.channel,
+      timestamp: mention.ts,
+    });
+
+  // Is this mention a part of an existing session?
+  const session = mention.thread_ts
+    ? await getExistingSession(mention.thread_ts)
+    : null;
+
+  if (session) {
+    console.log(
+      `Mention is a part of existing session ${session.sessionId}, last response ID ${session.lastResponseId}.`
+    );
+  } else {
+    console.log(`Previous session for this mention not found.`);
+  }
+
+  // Generate LLM response
   const response = await openai.responses.create({
     model: "gpt-4.1",
     input: mention.text,
+    previous_response_id: session?.lastResponseId,
   });
 
-  // Stop spinner
-  await slack.reactions.remove({
-    name: spinnerReaction,
-    channel: mention.channel,
-    timestamp: mention.ts,
-  });
-
+  // On error report to the thread and bail out early
   if (response.error) {
+    await stopSpinner();
     await slack.chat.postMessage({
       channel: mention.channel,
       thread_ts: mention.event_ts,
@@ -74,6 +92,23 @@ async function respondToMention(mention: AppMention): Promise<void> {
     return;
   }
 
+  // Save session
+  if (session) {
+    console.log(`Updating last response ID for session to ${response.id}.`);
+    await saveSession({ ...session, lastResponseId: response.id });
+  } else if (mention.thread_ts) {
+    console.log(
+      `Creating new session with initial response ID ${response.id}.`
+    );
+    await createSession({
+      sessionId: mention.thread_ts,
+      lastResponseId: response.id,
+    });
+  } else {
+    console.warn("Mention is not a part of a thread, is this wrong?");
+  }
+
+  await stopSpinner();
   await slack.chat.postMessage({
     channel: mention.channel,
     thread_ts: mention.event_ts,
