@@ -79,6 +79,12 @@ async function respondToMention(mention: AppMention): Promise<void> {
     model: "gpt-4.1",
     input: mention.text,
     previous_response_id: session?.lastResponseId,
+    tools: [
+      {
+        type: "file_search",
+        vector_store_ids: [process.env.VECTOR_STORE_ID ?? "<unset>"],
+      },
+    ],
   });
 
   // On error report to the thread and bail out early
