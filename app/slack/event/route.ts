@@ -10,6 +10,8 @@ import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { union } from "typescript-json-decoder";
 import { createSession, getExistingSession, saveSession } from "@/src/db";
+import path from "path";
+import { promises as fs } from "fs";
 
 export async function POST(request: NextRequest): Promise<Response> {
   const decodeIncomingMessage = union(
@@ -75,9 +77,15 @@ async function respondToMention(mention: AppMention): Promise<void> {
   }
 
   // Generate LLM response
+  const prompt = await fs.readFile(
+    path.join(process.cwd(), "/app/prompt.txt"),
+    "utf-8"
+  );
+
   const response = await openai.responses.create({
     model: "gpt-4.1",
     input: mention.text,
+    instructions: prompt,
     previous_response_id: session?.lastResponseId,
     tools: [
       {
