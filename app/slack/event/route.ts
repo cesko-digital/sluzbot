@@ -11,11 +11,11 @@ import OpenAI from "openai";
 import { union } from "typescript-json-decoder";
 import {
   createSession,
+  defaultModelId,
   getExistingSession,
   saveSession,
 } from "@/src/db/session";
-import path from "path";
-import { promises as fs } from "fs";
+import { getModelById } from "@/src/db/model";
 
 export async function POST(request: NextRequest): Promise<Response> {
   const decodeIncomingMessage = union(
@@ -80,23 +80,32 @@ async function respondToMention(mention: AppMention): Promise<void> {
     console.log(`Previous session for this mention not found.`);
   }
 
-  // Generate LLM response
-  const prompt = await fs.readFile(
-    path.join(process.cwd(), "/app/prompt.txt"),
-    "utf-8"
-  );
+  // Read model config from DB
+  const model = await getModelById(session?.model ?? defaultModelId);
+  if (!model) {
+    await stopSpinner();
+    await slack.chat.postMessage({
+      channel: mention.channel,
+      thread_ts: mention.event_ts,
+      text: "Failed to read model from the database, sorry. Blame zoul!",
+    });
+    return;
+  }
 
+  // Generate response according to model config
   const response = await openai.responses.create({
-    model: "gpt-4.1",
+    model: model.llm,
     input: mention.text,
-    instructions: prompt,
+    instructions: model.prompt,
     previous_response_id: session?.lastResponseId,
-    tools: [
-      {
-        type: "file_search",
-        vector_store_ids: [process.env.VECTOR_STORE_ID ?? "<unset>"],
-      },
-    ],
+    tools: model.vectorStoreId
+      ? [
+          {
+            type: "file_search",
+            vector_store_ids: [model.vectorStoreId],
+          },
+        ]
+      : [],
   });
 
   // On error report to the thread and bail out early
