@@ -1,5 +1,13 @@
 import Airtable from "airtable";
-import { array, number, record, string } from "typescript-json-decoder";
+import {
+  array,
+  DecoderFunction,
+  number,
+  record,
+  string,
+  undef,
+  union,
+} from "typescript-json-decoder";
 
 /**
  * The Airtable base with our tables
@@ -9,15 +17,21 @@ import { array, number, record, string } from "typescript-json-decoder";
 export const getTableById = (tableId: string) =>
   new Airtable().base("appoVMy46LJ2cmQQl")(tableId);
 
+/** Decode first element of an array, returns `undefined` if array is empty */
+export const decodeFirst =
+  <T>(decodeItem: DecoderFunction<T>) =>
+  (value: unknown): T | undefined => {
+    const decodeItems = array(decodeItem);
+    const items = decodeItems(value);
+    return items.at(0) as T | undefined;
+  };
+
 /**
  * Decode Airtable lookup field
  *
  * Lookup fields are represented as arrays of strings in the API.
  */
-export const decodeLookupField = (value: unknown) => {
-  const records = array(string)(value);
-  return records.at(0);
-};
+export const decodeLookupField = union(undef, decodeFirst(string));
 
 /**
  * Decode Airtable linked record field
