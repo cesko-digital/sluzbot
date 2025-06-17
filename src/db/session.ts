@@ -51,7 +51,7 @@ export const createSession = (
     .create({
       "Session ID": session.sessionId,
       "Last Response ID": session.lastResponseId,
-      "Model": defaultModelId,
+      "Model": [defaultModelId],
     })
     .then((record) => record.fields)
     .then(decodeSession)
