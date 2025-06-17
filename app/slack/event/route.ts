@@ -92,6 +92,10 @@ async function respondToMention(mention: AppMention): Promise<void> {
     return;
   }
 
+  console.log(
+    `Using model ${model.name}, LLM ${model.llm}, vector store ${model.vectorStoreId}.`
+  );
+
   // Generate response according to model config
   const response = await openai.responses.create({
     model: model.llm,
