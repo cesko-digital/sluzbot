@@ -17,6 +17,8 @@ import {
 } from "@/src/db/session";
 import { getModelById } from "@/src/db/model";
 
+const emptyVectorStoreId = "vs_68516d005db48191a6aeae0d95c0f0d6";
+
 export async function POST(request: NextRequest): Promise<Response> {
   const decodeIncomingMessage = union(
     decodeEndpointHandshake,
@@ -102,14 +104,12 @@ async function respondToMention(mention: AppMention): Promise<void> {
     input: mention.text,
     instructions: model.prompt,
     previous_response_id: session?.lastResponseId,
-    tools: model.vectorStoreId
-      ? [
-          {
-            type: "file_search",
-            vector_store_ids: [model.vectorStoreId],
-          },
-        ]
-      : [],
+    tools: [
+      {
+        type: "file_search",
+        vector_store_ids: [model.vectorStoreId ?? emptyVectorStoreId],
+      },
+    ],
   });
 
   // On error report to the thread and bail out early
