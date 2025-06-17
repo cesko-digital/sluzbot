@@ -9,7 +9,11 @@ import { WebClient } from "@slack/web-api";
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { union } from "typescript-json-decoder";
-import { createSession, getExistingSession, saveSession } from "@/src/db";
+import {
+  createSession,
+  getExistingSession,
+  saveSession,
+} from "@/src/db/session";
 import path from "path";
 import { promises as fs } from "fs";
 

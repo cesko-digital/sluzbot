@@ -1,23 +1,31 @@
-import Airtable from "airtable";
 import { decodeType, field, record, string } from "typescript-json-decoder";
+import {
+  decodeLinkedRecord,
+  decodeLookupField,
+  getTableById,
+  logErrorAndReturnNull,
+} from "./shared";
 
-const base = new Airtable().base("appoVMy46LJ2cmQQl");
-const table = base("tbl1FyksMUFTYj1uk");
+const table = () => getTableById("tbl1FyksMUFTYj1uk");
+
+const defaultModelId = "recDdQrpb7l8F7esJ";
 
 export type Session = decodeType<typeof decodeSession>;
-const decodeSession = record({
+export const decodeSession = record({
+  // Basic fields
   databaseId: field("ID", string),
   sessionId: field("Session ID", string),
   lastResponseId: field("Last Response ID", string),
+  // Model link
+  model: field("Model", decodeLinkedRecord),
+  // Model lookup fields
+  llm: field("LLM", decodeLookupField),
+  vectorStoreId: field("Vector Store ID", decodeLookupField),
+  prompt: field("Prompt", decodeLookupField),
 });
 
-const logErrorAndReturnNull = (e: Error) => {
-  console.error(e);
-  return null;
-};
-
 export const getExistingSession = (id: string): Promise<Session | null> =>
-  table
+  table()
     .select({
       maxRecords: 1,
       filterByFormula: `{Session ID} = "${id}"`,
@@ -28,7 +36,7 @@ export const getExistingSession = (id: string): Promise<Session | null> =>
     .catch(logErrorAndReturnNull);
 
 export const saveSession = (session: Session): Promise<Session | null> =>
-  table
+  table()
     .update(session.databaseId, {
       "Last Response ID": session.lastResponseId,
     })
@@ -39,10 +47,11 @@ export const saveSession = (session: Session): Promise<Session | null> =>
 export const createSession = (
   session: Omit<Session, "databaseId">
 ): Promise<Session | null> =>
-  table
+  table()
     .create({
       "Session ID": session.sessionId,
       "Last Response ID": session.lastResponseId,
+      "Model": defaultModelId,
     })
     .then((record) => record.fields)
     .then(decodeSession)
