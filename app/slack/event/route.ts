@@ -15,7 +15,12 @@ import {
   getExistingSession,
   saveSession,
 } from "@/src/db/session";
-import { getModelById } from "@/src/db/model";
+import {
+  doesModelNeedVectorStoreUpdate,
+  getModelById,
+  saveModel,
+  updateVectorStore,
+} from "@/src/db/model";
 
 const emptyVectorStoreId = "vs_68516d005db48191a6aeae0d95c0f0d6";
 
@@ -83,7 +88,7 @@ async function respondToMention(mention: AppMention): Promise<void> {
   }
 
   // Read model config from DB
-  const model = await getModelById(session?.model ?? defaultModelId);
+  let model = await getModelById(session?.model ?? defaultModelId);
   if (!model) {
     await stopSpinner();
     await slack.chat.postMessage({
@@ -92,6 +97,18 @@ async function respondToMention(mention: AppMention): Promise<void> {
       text: "Failed to read model from the database, sorry. Blame zoul!",
     });
     return;
+  }
+
+  // Refresh vector store if needed
+  if (doesModelNeedVectorStoreUpdate(model)) {
+    console.log(`Model needs context refresh, will do now.`);
+    await slack.chat.postMessage({
+      channel: mention.channel,
+      thread_ts: mention.event_ts,
+      text: "Model needs context refresh, this will take a bit longer.",
+    });
+    model = await updateVectorStore(model, openai);
+    await saveModel(model);
   }
 
   console.log(
