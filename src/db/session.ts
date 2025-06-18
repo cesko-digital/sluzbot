@@ -1,4 +1,10 @@
-import { decodeType, field, record, string } from "typescript-json-decoder";
+import {
+  decodeType,
+  field,
+  optional,
+  record,
+  string,
+} from "typescript-json-decoder";
 import {
   decodeLinkedRecord,
   decodeLookupField,
@@ -16,6 +22,7 @@ export const decodeSession = record({
   databaseId: field("ID", string),
   sessionId: field("Session ID", string),
   lastResponseId: field("Last Response ID", string),
+  slackLink: field("Slack Link", optional(string)),
   // Model link
   model: field("Model", decodeLinkedRecord),
   // Model lookup fields

@@ -8,7 +8,7 @@ import { waitUntil } from "@vercel/functions";
 import { WebClient } from "@slack/web-api";
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
-import { union } from "typescript-json-decoder";
+import { record, string, union } from "typescript-json-decoder";
 import {
   createSession,
   defaultModelId,
@@ -131,9 +131,18 @@ async function respondToMention(mention: AppMention): Promise<void> {
     console.log(
       `Creating new session with initial response ID ${response.id}.`
     );
+    const permalink = await slack.chat
+      .getPermalink({
+        channel: mention.channel,
+        message_ts: mention.event_ts,
+      })
+      .then(record({ permalink: string }))
+      .then((response) => response.permalink)
+      .catch(() => undefined);
     await createSession({
       sessionId: mention.thread_ts ?? mention.ts,
       lastResponseId: response.id,
+      slackLink: permalink,
     });
   }
 
