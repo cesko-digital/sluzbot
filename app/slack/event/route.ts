@@ -138,7 +138,10 @@ async function respondToMention(mention: AppMention): Promise<void> {
       })
       .then(record({ permalink: string }))
       .then((response) => response.permalink)
-      .catch(() => undefined);
+      .catch((e) => {
+        console.error(e);
+        return undefined;
+      });
     await createSession({
       sessionId: mention.thread_ts ?? mention.ts,
       lastResponseId: response.id,
