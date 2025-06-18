@@ -58,6 +58,7 @@ export const createSession = (
     .create({
       "Session ID": session.sessionId,
       "Last Response ID": session.lastResponseId,
+      "Slack Link": session.slackLink,
       "Model": [defaultModelId],
     })
     .then((record) => record.fields)
