@@ -134,7 +134,7 @@ async function respondToMention(mention: AppMention): Promise<void> {
     const permalink = await slack.chat
       .getPermalink({
         channel: mention.channel,
-        message_ts: mention.event_ts,
+        message_ts: mention.ts,
       })
       .then(record({ permalink: string }))
       .then((response) => response.permalink)
