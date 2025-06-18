@@ -26,6 +26,18 @@ export const decodeFirst =
     return items.at(0) as T | undefined;
   };
 
+/** Decode an array, treating `undefined` as empty array */
+export const optionalArray =
+  <T>(decodeItem: DecoderFunction<T>) =>
+  (value: unknown) => {
+    if (typeof value === "undefined") {
+      return [];
+    } else {
+      const decodeItems = array(decodeItem);
+      return decodeItems(value);
+    }
+  };
+
 /**
  * Decode Airtable lookup field
  *

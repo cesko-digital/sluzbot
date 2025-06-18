@@ -15,6 +15,13 @@ test("Vector store update detection", () => {
       lastContextUpdate: undefined,
       lastVectorStoreUpdate: undefined,
     }),
+    true
+  );
+  assert.strictEqual(
+    doesModelNeedVectorStoreUpdate({
+      lastContextUpdate: undefined,
+      lastVectorStoreUpdate: new Date("2025-06-17T08:37:12.000Z"),
+    }),
     false
   );
   assert.strictEqual(

@@ -9,6 +9,7 @@ import {
 } from "typescript-json-decoder";
 import {
   decodeAttachment,
+  optionalArray,
   getTableById,
   logErrorAndReturnNull,
 } from "./shared";
@@ -22,7 +23,7 @@ const decodeModel = record({
   name: field("Name", string),
   llm: field("LLM", string),
   prompt: field("Prompt", string),
-  context: field("Context", array(decodeAttachment)),
+  context: field("Context", optionalArray(decodeAttachment)),
   vectorStoreId: field("Vector Store ID", optional(string)),
   lastContextUpdate: field("Last Context Update", optional(date)),
   lastVectorStoreUpdate: field("Last Vector Store Update", optional(date)),
@@ -57,8 +58,8 @@ export function doesModelNeedVectorStoreUpdate(
   model: Pick<Model, "lastContextUpdate" | "lastVectorStoreUpdate">
 ): boolean {
   return (
-    !!model.lastContextUpdate &&
-    (!model.lastVectorStoreUpdate ||
+    !model.lastVectorStoreUpdate ||
+    (!!model.lastContextUpdate &&
       model.lastVectorStoreUpdate < model.lastContextUpdate)
   );
 }
