@@ -17,6 +17,7 @@ test("Decode session", () => {
     databaseId: "recAqHBmnktRtTyxn",
     sessionId: "1749888537.718379",
     lastResponseId: "resp_684d2e7f430481999449ec4480275d6905d29d8caf670602",
+    slackLink: undefined,
     model: "recDdQrpb7l8F7esJ",
     prompt: "Your name is Službot, you are…",
     vectorStoreId: "foo",
