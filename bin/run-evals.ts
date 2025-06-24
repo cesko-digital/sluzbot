@@ -8,6 +8,7 @@ import {
   updateVectorStore,
 } from "@/src/db/model";
 import { getAllQuestions } from "@/src/db/question";
+import { createResponseWithRetry } from "@/src/openAI";
 import OpenAI from "openai";
 
 async function main() {
@@ -44,7 +45,7 @@ async function main() {
     );
 
     for (const question of pendingQuestions) {
-      const response = await openAI.responses.create({
+      const response = await createResponseWithRetry(openAI, {
         model: model.llm,
         input: question.question,
         instructions: model.prompt,
@@ -55,17 +56,12 @@ async function main() {
           },
         ],
       });
-
-      if (!response.error) {
-        await saveEval({
-          modelId: model.id,
-          questionId: question.id,
-          response: response.output_text,
-        });
-        console.log(`- ${question.name}`);
-      } else {
-        console.error(response.error);
-      }
+      await saveEval({
+        modelId: model.id,
+        questionId: question.id,
+        response: response.output_text,
+      });
+      console.log(`- ${question.name}`);
     }
   }
 }
