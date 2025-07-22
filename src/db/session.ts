@@ -14,7 +14,7 @@ import {
 
 const table = () => getTableById("tbl1FyksMUFTYj1uk");
 
-export const defaultModelId = "recDdQrpb7l8F7esJ";
+export const defaultModelId = "recNlAIxJI2pGuOgV";
 
 export type Session = decodeType<typeof decodeSession>;
 export const decodeSession = record({
