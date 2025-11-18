@@ -28,7 +28,7 @@
     "dotenv-flow": "^4.1.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
-    "glob": "^11.0.3",
+    "glob": "^11.1.0",
     "tailwindcss": "^4",
     "tsx": "^4.20.2",
     "typescript": "^5"
